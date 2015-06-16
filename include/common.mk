@@ -1,7 +1,7 @@
 USERID = $(shell id -u)
 GROUPID = $(shell id -g)
 
-.PHONY: all show clean package shell
+.PHONY: all show clean package shell prepare
 
 ifndef BUILD_NUMBER
 $(info BUILD_NUMBER set to 0)
@@ -28,6 +28,9 @@ Dockerfile:
 
 image: show Dockerfile
 	docker build -t $(IMAGE) .
+ifneq ($(BUILD_NUMBER), 0)
+	docker tag $(IMAGE):latest $(IMAGE):$(BUILD_NUMBER)
+endif
 
 clean:
 	rm -rf Dockerfile build-env
@@ -35,10 +38,10 @@ clean:
 build-env:
 	cp -r volume build-env
 
-package: build-env
+package: build-env prepare
 	docker run --rm -v $(PWD)/build-env/:/home/builder/build \
 		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -t $(IMAGE)
 
-shell: build-env
+shell: build-env prepare
 	docker run -it --rm -v $(PWD)/build-env/:/home/builder/build \
 		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -t $(IMAGE) /bin/bash

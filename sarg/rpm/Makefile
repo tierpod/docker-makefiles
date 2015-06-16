@@ -1,4 +1,4 @@
 IMAGE = builder-sarg
 TARGET = sarg.spec
 
-include ../../include/Makefile
+include ../../include/common.mk

@@ -1,4 +1,4 @@
 IMAGE = builder-postfix-vda
 TARGET = postfix-vda.spec
 
-include ../../include/Makefile
+include ../../include/common.mk
