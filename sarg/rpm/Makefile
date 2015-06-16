@@ -1,0 +1,42 @@
+IMAGE = builder-sarg
+
+USERID = $(shell id -u)
+GROUPID = $(shell id -g)
+
+.PHONY: all show clean build package shell
+
+ifndef BUILD_NUMBER
+BUILD_NUMBER = 0
+endif
+
+ifndef TARGET
+$(error TARGET is not set)
+endif
+
+all: show image package clean
+
+show:
+	@echo '==> IMAGE=$(IMAGE) BUILD_NUMBER=$(BUILD_NUMBER) TARGET=$(TARGET)'
+
+Dockerfile:
+	@cat Dockerfile.template | \
+		sed -e "s@{userid}@$(USERID)@" -e "s@{groupid}@$(GROUPID)@" -e "s@{target}@$(TARGET)@" | \
+		tee Dockerfile
+
+image: show Dockerfile
+	docker build -t $(IMAGE) .
+
+clean:
+	@rm -f Dockerfile
+	@rm -rf build-env
+
+build-env:
+	cp -r volume build-env
+
+package: build-env
+	docker run --rm -v $(PWD)/build-env/:/home/builder/build \
+		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -t $(IMAGE)
+
+shell: build-env
+	docker run -it --rm -v $(PWD)/build-env/:/home/builder/build \
+		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -t $(IMAGE) /bin/bash
