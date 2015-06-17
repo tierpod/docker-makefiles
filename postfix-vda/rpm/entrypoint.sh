@@ -10,8 +10,8 @@ if [ -n "$TARGET" ] && [ -n "$BUILD_NUMBER" ]; then
 	cd ../
 	spectool -g -R SPECS/$TARGET
 	# Build rpm package
-	rpmbuild --define "BUILD_NUMBER $BUILD_NUMBER" -ba SPECS/$TARGET
+	rpmbuild --define "build_number $BUILD_NUMBER" -ba SPECS/$TARGET
 else
-	echo 'Usage: TARGET=project BUILD_NUMBER=0 entrypoint.sh'
+	echo 'Usage: TARGET=project.spec BUILD_NUMBER=0 entrypoint.sh'
 	exit 1
 fi
