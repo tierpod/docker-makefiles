@@ -16,10 +16,18 @@ ifndef IMAGE
 $(error IMAGE is not set)
 endif
 
+ifeq ($(GIT), 1)
+$(info Get RELEASE from BUILD_NUMBER and COMMIT)
+COMMIT = $(shell git rev-parse --short HEAD)
+RELEASE = $(BUILD_NUMBER).git$(COMMIT)
+endif
+
 all: show image package
 
 show:
-	@echo '==> IMAGE=$(IMAGE) BUILD_NUMBER=$(BUILD_NUMBER) TARGET=$(TARGET) USERID=$(USERID) GROUPID=$(GROUPID)'
+	@echo '==> USERID=$(USERID) GROUPID=$(GROUPID)'
+	@echo '    BUILD_NUMBER=$(BUILD_NUMBER) RELEASE=$(RELEASE)'
+	@echo '    IMAGE=$(IMAGE) TARGET=$(TARGET) GIT=$(GIT)'
 
 Dockerfile:
 	@cat Dockerfile.template | \
@@ -40,8 +48,8 @@ build-env:
 
 package: build-env prepare
 	docker run --rm -v $(PWD)/build-env/:/home/builder/build \
-		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -t $(IMAGE)
+		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -e RELEASE=$(RELEASE) -t $(IMAGE)
 
 shell: build-env prepare
 	docker run -it --rm -v $(PWD)/build-env/:/home/builder/build \
-		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -t $(IMAGE) /bin/bash
+		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -e RELEASE=$(RELEASE) -t $(IMAGE) /bin/bash
