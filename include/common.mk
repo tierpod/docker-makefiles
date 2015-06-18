@@ -11,13 +11,14 @@ ifeq ($(GIT), 1)
 $(info Get RELEASE from BUILD_NUMBER and COMMIT)
 COMMIT = $(shell git rev-parse --short HEAD)
 RELEASE = $(BUILD_NUMBER).git$(COMMIT)
+else
+RELEASE = $(BUILD_NUMBER)
 endif
 
 all: show image package
 
 show:
-	@echo ' USERID=$(USERID) GROUPID=$(GROUPID)'
-	@echo ' BUILD_NUMBER=$(BUILD_NUMBER) RELEASE=$(RELEASE)'
+	@echo ' USERID=$(USERID) GROUPID=$(GROUPID) RELEASE=$(RELEASE)'
 	@echo ' IMAGE=$(IMAGE) TARGET=$(TARGET) GIT=$(GIT)'
 
 Dockerfile:
@@ -39,8 +40,8 @@ build-env:
 
 package: build-env prepare
 	docker run --rm -v $(PWD)/build-env/:/home/builder/build \
-		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -e RELEASE=$(RELEASE) -t $(IMAGE)
+		-e TARGET=$(TARGET) -e RELEASE=$(RELEASE) $(IMAGE)
 
 shell: build-env prepare
 	docker run -it --rm -v $(PWD)/build-env/:/home/builder/build \
-		-e BUILD_NUMBER=$(BUILD_NUMBER) -e TARGET=$(TARGET) -e RELEASE=$(RELEASE) -t $(IMAGE) /bin/bash
+		-e TARGET=$(TARGET) -e RELEASE=$(RELEASE) $(IMAGE) /bin/bash
