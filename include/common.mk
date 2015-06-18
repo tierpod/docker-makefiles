@@ -3,18 +3,9 @@ GROUPID = $(shell id -g)
 
 .PHONY: all show clean package shell prepare
 
-ifndef BUILD_NUMBER
-$(info BUILD_NUMBER set to 0)
-BUILD_NUMBER = 0
-endif
-
-ifndef TARGET
-$(error TARGET is not set)
-endif
-
-ifndef IMAGE
-$(error IMAGE is not set)
-endif
+BUILD_NUMBER ?= 0
+TARGET ?= $(error TARGET is not defined)
+IMAGE ?= $(error IMAGE is not defined)
 
 ifeq ($(GIT), 1)
 $(info Get RELEASE from BUILD_NUMBER and COMMIT)
@@ -25,9 +16,9 @@ endif
 all: show image package
 
 show:
-	@echo '==> USERID=$(USERID) GROUPID=$(GROUPID)'
-	@echo '    BUILD_NUMBER=$(BUILD_NUMBER) RELEASE=$(RELEASE)'
-	@echo '    IMAGE=$(IMAGE) TARGET=$(TARGET) GIT=$(GIT)'
+	@echo ' USERID=$(USERID) GROUPID=$(GROUPID)'
+	@echo ' BUILD_NUMBER=$(BUILD_NUMBER) RELEASE=$(RELEASE)'
+	@echo ' IMAGE=$(IMAGE) TARGET=$(TARGET) GIT=$(GIT)'
 
 Dockerfile:
 	@cat Dockerfile.template | \
