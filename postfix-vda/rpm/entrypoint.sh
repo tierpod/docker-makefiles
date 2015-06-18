@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-if [ -n "$TARGET" ] && [ -n "$BUILD_NUMBER" ]; then
+if [ -n "$TARGET" ]; then
 	# Create SOURCES directory
 	[ -d 'SOURCES' ] || mkdir SOURCES
 	# Download and extract src.rpm to SOURCES
@@ -10,8 +10,8 @@ if [ -n "$TARGET" ] && [ -n "$BUILD_NUMBER" ]; then
 	cd ../
 	spectool -g -R SPECS/$TARGET
 	# Build rpm package
-	rpmbuild --define "build_number $BUILD_NUMBER" -ba SPECS/$TARGET
+	rpmbuild -ba SPECS/$TARGET
 else
-	echo 'Usage: TARGET=project.spec BUILD_NUMBER=0 entrypoint.sh'
+	echo 'Usage: TARGET=project.spec entrypoint.sh'
 	exit 1
 fi
