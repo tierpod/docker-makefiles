@@ -15,6 +15,8 @@ else
 RELEASE = $(BUILD_NUMBER)
 endif
 
+DOCKER_OPTS = --rm -v $(PWD)/build-env/:/home/builder/build -e TARGET=$(TARGET) -e RELEASE=$(RELEASE) 
+
 all: show image package
 
 show:
@@ -39,9 +41,7 @@ build-env:
 	cp -r volume build-env
 
 package: build-env prepare
-	docker run --rm -v $(PWD)/build-env/:/home/builder/build \
-		-e TARGET=$(TARGET) -e RELEASE=$(RELEASE) $(IMAGE)
+	docker run $(DOCKER_OPTS) $(IMAGE)
 
 shell: build-env prepare
-	docker run -it --rm -v $(PWD)/build-env/:/home/builder/build \
-		-e TARGET=$(TARGET) -e RELEASE=$(RELEASE) $(IMAGE) /bin/bash
+	docker run -it $(DOCKER_OPTS) $(IMAGE) /bin/bash
