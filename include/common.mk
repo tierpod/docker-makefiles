@@ -1,7 +1,7 @@
 USERID = $(shell id -u)
 GROUPID = $(shell id -g)
 
-.PHONY: all show clean package shell prepare
+.PHONY: all show clean clean-all package shell prepare
 
 BUILD_NUMBER ?= 0
 TARGET ?= $(error TARGET is not defined)
@@ -36,6 +36,9 @@ endif
 
 clean:
 	rm -rf Dockerfile build-env
+
+clean-all: clean
+	docker rmi $(IMAGE):$(BUILD_NUMBER)
 
 build-env:
 	cp -r volume build-env
