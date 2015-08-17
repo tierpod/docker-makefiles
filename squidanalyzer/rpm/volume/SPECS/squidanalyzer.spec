@@ -11,7 +11,7 @@ Source:		https://github.com/darold/%{name}/archive/v%{version}-%{release}.tar.gz
 BuildRequires:	perl
 BuildArch:	noarch
 
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: perl-ExtUtils-MakeMaker, perl-ExtUtils-Install, perl-ExtUtils-Manifest, perl-ExtUtils-ParseXS, perl-Time-HiRes
 BuildRequires: gdbm-devel, libdb-devel, perl-devel, systemtap-sdt-devel
 
@@ -41,8 +41,13 @@ rm -rf %{buildroot}
 
 make DESTDIR=%{buildroot} install
 install etc/* %{buildroot}%{_sysconfdir}/%{name}/
-install -d %{buildroot}%{_sysconfdir}/cron.daily
-echo -e "#!/bin/sh\n%{_bindir}/squid-analyzer" > %{buildroot}%{_sysconfdir}/cron.daily/0%{name}
+install -d %{buildroot}%{_sysconfdir}/cron.d
+cat <<CRON > %{buildroot}%{_sysconfdir}/cron.d/%{name}
+SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+50 23 * * * root squid-analyzer && squid -k rotate
+CRON
 
 
 %files
@@ -59,7 +64,7 @@ echo -e "#!/bin/sh\n%{_bindir}/squid-analyzer" > %{buildroot}%{_sysconfdir}/cron
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/%{name}/included
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/%{name}/network-aliases
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/%{name}/user-aliases
-%config(noreplace) %attr(0754,root,root) %{_sysconfdir}/cron.daily/0%{name}
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/cron.d/%{name}
 %attr(0755,root,root) %dir %{_sysconfdir}/%{name}/lang
 %{_sysconfdir}/%{name}/lang/*
 %attr(0755,root,root) %dir %{contentdir}/html/%{name}
