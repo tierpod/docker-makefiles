@@ -11,7 +11,7 @@ make image
 make package
 ```
 
-## Makefile
+## Makefile в поддиректориях
 
 ```
 # имя docker image
@@ -19,7 +19,9 @@ IMAGE = builder
 # цели для сборки
 TARGET = project.spec
 # добавить git commit в RELEASE
-GIT = 1
+COMMIT = $(shell git rev-parse --short HEAD)
+# либо
+# COMMIT = $(shell cd /path/to/source/ && git rev-parse --short HEAD)
 
 # действия, выполняемые до запуска компиляции на хосте
 prepare:

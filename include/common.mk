@@ -7,21 +7,19 @@ BUILD_NUMBER ?= 0
 TARGET ?= $(error TARGET is not defined)
 IMAGE ?= $(error IMAGE is not defined)
 
-ifeq ($(GIT), 1)
-$(info Get RELEASE from BUILD_NUMBER and COMMIT)
-COMMIT = $(shell git rev-parse --short HEAD)
+ifdef COMMIT
 RELEASE = $(BUILD_NUMBER).git$(COMMIT)
 else
 RELEASE = $(BUILD_NUMBER)
 endif
 
-DOCKER_OPTS = --rm -v $(PWD)/build-env/:/home/builder/build -e TARGET=$(TARGET) -e RELEASE=$(RELEASE) 
+DOCKER_OPTS = --rm -v $(PWD)/build-env/:/home/builder/build -e TARGET=$(TARGET) -e RELEASE=$(RELEASE)
 
 all: show image package
 
 show:
 	@echo ' USERID=$(USERID) GROUPID=$(GROUPID) RELEASE=$(RELEASE)'
-	@echo ' IMAGE=$(IMAGE) TARGET=$(TARGET) GIT=$(GIT)'
+	@echo ' IMAGE=$(IMAGE) TARGET=$(TARGET) COMMIT=$(COMMIT)'
 
 Dockerfile:
 	@cat Dockerfile.template | \
