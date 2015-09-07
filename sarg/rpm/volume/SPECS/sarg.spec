@@ -7,7 +7,7 @@
 Summary: Squid usage report generator per user/ip/name
 Name: sarg
 Version: 2.3.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group: Applications/Internet
 URL: http://sarg.sourceforge.net/sarg.php
@@ -34,126 +34,71 @@ showing users, IP addresses, bytes, sites and times.
 
 %{__chmod} u+wx sarg-php/locale/
 
+# Update default config
 %{__perl} -pi.orig -e '
-        s|^#(access_log) (.+)$|#$1 $2\n$1 %{_localstatedir}/log/squid/access.log|;
-        s|^#(output_dir) (.+)$|#$1 $2\n$1 %{_localstatedir}/www/sarg/ONE-SHOT|;
-        s|^#(resolve_ip) (.+)$|#$1 $2\n$1 yes|;
+        s|^#(access_log) (.+)$|#$1 $2\n$1 %{_localstatedir}/log/squid/access.log.0|;
+        s|^#(output_dir) (.+)$|#$1 $2\n$1 %{_localstatedir}/www/html/sarg|;
         s|^#(show_successful_message) (.+)$|#$1 $2\n$1 no|;
         s|^#(mail_utility) (.+)$|#$1 $2\n$1 mail|;
-        s|^#(external_css_file) (.+)$|#$1 $2\n$1 %{_localstatedir}/www/sarg/sarg.css|;
+        s|^#(external_css_file) (.+)$|#$1 $2\n$1 /sarg/sarg.css|;
+		s|^#(graph_font) (.+)$|#$1 $2\n$1 %{_sysconfdir}/sarg/fonts/DejaVuSans.ttf|;
+		s|^#(font_size) (.+)$|#$1 $2\n$1 12px|;
+		s|^#(header_font_size) (.+)$|#$1 $2\n$1 12px|;
+		s|^#(title_font_size) (.+)$|#$1 $2\n$1 14px|;
     ' sarg.conf
 
-%{__cat} <<'EOF' >sarg.daily
-#!/bin/bash
+# Add nginx config
+%{__cat} <<'EOF' >sarg-nginx.conf
+server {
+	listen *:443;
+	server_name	localhost;
 
-# Get yesterday's date
-YESTERDAY=$(date --date "1 day ago" +%d/%m/%Y)
+	access_log /var/log/nginx/sarg-ssl-access.log main;
 
-exec %{_bindir}/sarg \
-    -o %{_localstatedir}/www/sarg/daily \
-    -d $YESTERDAY &>/dev/null
-exit 0
+	ssl on;
+	ssl_certificate ssl/localhost.crt;
+	ssl_certificate_key ssl/localhost.key;
+
+	ssl_protocols SSLv3 TLSv1;
+	ssl_ciphers ALL:!ADH:!EXPORT56:RC4:RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
+	ssl_prefer_server_ciphers on;
+
+	ssl_session_timeout 5m;
+
+	location /sarg {
+		autoindex on;
+		root /var/www/html;
+		auth_basic "Restricted";
+		auth_basic_user_file auth/htpasswd;
+	}
+}
 EOF
 
-%{__cat} <<'EOF' >sarg.weekly
-#!/bin/bash
-LOG_FILES=
-for FILE in /var/log/squid/access.log*; do
-    LOG_FILES="$LOG_FILES -l $FILE"
-done
-
-# Get yesterday's date
-YESTERDAY=$(date --date "1 day ago" +%d/%m/%Y)
-
-# Get one week ago date
-WEEKAGO=$(date --date "7 days ago" +%d/%m/%Y)
-
-exec %{_bindir}/sarg \
-    $LOG_FILES \
-    -o %{_localstatedir}/www/sarg/weekly \
-    -d $WEEKAGO-$YESTERDAY &>/dev/null
-exit 0
+# Add cron.d
+%{__cat} <<'EOF' >sarg-cron
+SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+59 23 * * * root squid-maintenance.sh
 EOF
 
-%{__cat} <<'EOF' >sarg.monthly
-#!/bin/bash
-LOG_FILES=
-for FILE in /var/log/squid/access.log*; do
-    LOG_FILES="$LOG_FILES -l $FILE"
-done
+# Add squid-maintenance.sh
+%{__cat} <<'EOF' >squid-maintenance.sh
+#!/bin/sh -e
 
-# Get yesterday's date
-YESTERDAY=$(date --date "1 day ago" +%d/%m/%Y)
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
-# Get 1 month ago date
-MONTHAGO=$(date --date "1 month ago" +%d/%m/%Y)
+logger -t $0 'Start squid maintenance'
 
-exec %{_bindir}/sarg \
-    $LOG_FILES \
-    -o %{_localstatedir}/www/sarg/monthly \
-    -d $MONTHAGO-$YESTERDAY &>/dev/null
-exit 0
-EOF
+logger -t $0 'Rotate squid logs'
+squid -k rotate
 
-%{__cat} <<EOF >sarg-index.html
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE html PUBLIC "XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <title>Squid User's Access Report</title>
-    <style type="text/css">
-        #content         { width:20em; margin-left:auto; margin-right:auto; }
-        h1               { color:green; font-size:1.2em; text-align:center; }
-        table#reports    { border-collapse:collapse; width:20em; margin-left:auto; margin-right:auto; font-size:0.8em; }
-        table#reports td { padding:2px; background-color:#f5f5dc; border:solid white 1px; }
-        table#reports th { background-color:#feebcd; border:solid white 1px; color:#00008b; }
-    </style>
-</head>
-<body>
+sleep 5
 
-<div id="content">
-    <h1>Squid User's Access Report</h1>
+logger -t $0 'Generate sarg reports'
+sarg -l /var/logs/squid/access.log.0
 
-    <table summary="" id="reports">
-    <tbody>
-    <tr>
-        <th>DIRECTORY</th>
-        <th>DESCRIPTION</th>
-    </tr>
-    <tr>
-        <td><a href="ONE-SHOT/index.html">ONE-SHOT</a></td>
-        <td>One shot reports</td>
-    </tr>
-    <tr>
-        <td><a href="daily/index.html">daily</a></td>
-        <td>Daily reports</td>
-    </tr>
-    <tr>
-        <td><a href="weekly/index.html">weekly</a></td>
-        <td>Weekly reports</td>
-    </tr>
-    <tr>
-        <td><a href="monthly/index.html">monthly</a></td>
-        <td>Monthly reports</td>
-    </tr>
-    </tbody>
-    </table>
-</div>
-</body>
-</html>
-EOF
-
-%{__cat} <<EOF >sarg-http.conf
-Alias /sarg %{_localstatedir}/www/sarg
-
-<Directory %{_localstatedir}/www/sarg>
-    DirectoryIndex index.html
-    Order deny,allow
-    Deny from all
-    Allow from 127.0.0.1
-    Allow from ::1
-    # Allow from your-workstation.com
-</Directory>
+logger -t $0 'End squid maintenance'
 EOF
 
 %build
@@ -170,18 +115,15 @@ EOF
 %install
 %{__rm} -rf %{buildroot}
 %{__install} -Dp -m0755 sarg %{buildroot}%{_bindir}/sarg
+%{__install} -Dp -m0755 squid-maintenance.sh %{buildroot}%{_bindir}/squid-maintenance.sh
 %{__install} -Dp -m0644 sarg.conf %{buildroot}%{_sysconfdir}/sarg/sarg.conf
 %{__install} -Dp -m0644 exclude_codes %{buildroot}%{_sysconfdir}/sarg/exclude_codes
 %{__install} -Dp -m0644 sarg.1 %{buildroot}%{_mandir}/man1/sarg.1
 
-%{__install} -Dp -m0644 sarg-http.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/sarg.conf
-%{__install} -Dp -m0755 sarg.daily %{buildroot}%{_sysconfdir}/cron.daily/sarg
-%{__install} -Dp -m0755 sarg.weekly %{buildroot}%{_sysconfdir}/cron.weekly/sarg
-%{__install} -Dp -m0755 sarg.monthly %{buildroot}%{_sysconfdir}/cron.monthly/sarg
-%{__install} -Dp -m0644 sarg-index.html %{buildroot}%{_localstatedir}/www/sarg/index.html
-%{__install} -Dp -m0644 css.tpl %{buildroot}%{_localstatedir}/www/sarg/sarg.css
+%{__install} -Dp -m0644 sarg-nginx.conf %{buildroot}%{_sysconfdir}/nginx/conf.d/sarg.conf
+%{__install} -Dp -m0644 css.tpl %{buildroot}%{_localstatedir}/www/html/sarg/sarg.css
+%{__install} -Dp -m0755 sarg-cron %{buildroot}%{_sysconfdir}/cron.d/sarg
 
-%{__install} -d -m0755 %{buildroot}%{_localstatedir}/www/sarg/{ONE-SHOT,daily,weekly,monthly}/
 %{__cp} -av fonts/ images/ %{buildroot}%{_sysconfdir}/sarg/
 
 %clean
@@ -194,16 +136,24 @@ EOF
 %dir %{_sysconfdir}/sarg/
 %config %{_sysconfdir}/sarg/exclude_codes
 %config(noreplace) %{_sysconfdir}/sarg/sarg.conf
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/sarg.conf
-%config %{_sysconfdir}/cron.daily/sarg
-%config %{_sysconfdir}/cron.weekly/sarg
-%config %{_sysconfdir}/cron.monthly/sarg
+%config(noreplace) %{_sysconfdir}/nginx/conf.d/sarg.conf
 %{_bindir}/sarg
-%{_localstatedir}/www/sarg/
+%{_bindir}/squid-maintenance.sh
+%{_localstatedir}/www/html/sarg/
 %{_sysconfdir}/sarg/fonts/
 %{_sysconfdir}/sarg/images/
+%{_sysconfdir}/cron.d/sarg
 
 %changelog
+* Mon Sep 07 2015 Pavel Podkorytov <pod.pavel@gmail.com> - 2.3.10-3
+- Added cron.d script and squid-maintenance.sh scrips
+- Moved nginx directory to /var/www/html/sarg (centos 7 default)
+
+* Fri Sep 04 2015 Pavel Podkorytov <pod.pavel@gmail.com> - 2.3.10-2
+- Remove unused cron tasks
+- Remove sarg-index.html
+- Replace sarg-httpd with sarg-nginx config
+
 * Fri May 22 2015 Pavel Podkorytov <pod.pavel@gmail.com> - 2.3.10-1
 - Update to version 2.3.10-1
 - Remove 'language' directory
