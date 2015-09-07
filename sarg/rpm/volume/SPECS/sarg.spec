@@ -40,7 +40,6 @@ showing users, IP addresses, bytes, sites and times.
         s|^#(output_dir) (.+)$|#$1 $2\n$1 %{_localstatedir}/www/html/sarg|;
         s|^#(show_successful_message) (.+)$|#$1 $2\n$1 no|;
         s|^#(mail_utility) (.+)$|#$1 $2\n$1 mail|;
-        s|^#(external_css_file) (.+)$|#$1 $2\n$1 /sarg/sarg.css|;
 		s|^#(graph_font) (.+)$|#$1 $2\n$1 %{_sysconfdir}/sarg/fonts/DejaVuSans.ttf|;
 		s|^#(font_size) (.+)$|#$1 $2\n$1 12px|;
 		s|^#(header_font_size) (.+)$|#$1 $2\n$1 12px|;
