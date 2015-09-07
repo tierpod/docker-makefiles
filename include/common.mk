@@ -45,4 +45,4 @@ package: build-env prepare
 	docker run $(DOCKER_OPTS) $(IMAGE)
 
 shell: build-env prepare
-	docker run -it $(DOCKER_OPTS) $(IMAGE) /bin/bash
+	docker run -it -u root $(DOCKER_OPTS) $(IMAGE) /bin/bash
