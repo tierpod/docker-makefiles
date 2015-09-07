@@ -31,24 +31,74 @@ or more often with heavy proxy usage.
 
 %setup -q -n %{name}-%{version}-%{release}
 
+# Add cron config
+%{__cat} <<EOF > %{name}-cron
+SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+59 23 * * * root squid-maintenance.sh
+EOF
+
+# Add nginx config
+%{__cat} <<EOF >%{name}-nginx.conf
+server {
+	listen *:443;
+	server_name	localhost;
+
+	access_log /var/log/nginx/squidanalyzer-ssl-access.log main;
+
+	ssl on;
+	ssl_certificate ssl/localhost.crt;
+	ssl_certificate_key ssl/localhost.key;
+
+	ssl_protocols SSLv3 TLSv1;
+	ssl_ciphers ALL:!ADH:!EXPORT56:RC4:RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
+	ssl_prefer_server_ciphers on;
+
+	ssl_session_timeout 5m;
+
+	location /squidanalyzer {
+		autoindex on;
+		root /var/www/html;
+		auth_basic "Restricted";
+		auth_basic_user_file auth/htpasswd;
+	}
+}
+EOF
+
+# Add squid-maintenance.sh
+%{__cat} <<'EOF' >squid-maintenance.sh
+#!/bin/sh -e
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+logger -t $0 'Start squid maintenance'
+
+logger -t $0 'Rotate squid logs'
+squid -k rotate
+
+sleep 5
+
+logger -t $0 'Generate squidanalyzer reports'
+squid-analyzer --no-year-stat --no-week-stat --preserve 2 -j 2
+
+logger -t $0 'End squid maintenance'
+EOF
+
 %build
 perl Makefile.PL DESTDIR=%{buildroot} LOGFILE=%{_logdir}/squid/access.log BINDIR=%{_bindir} HTMLDIR=%{contentdir}/html/%{name} BASEURL=/%{name} MANDIR=%{_mandir}/man3 QUIET=yes
 
 make
 
 %install
-rm -rf %{buildroot}
+%{__rm} -rf %{buildroot}
 
-make DESTDIR=%{buildroot} install
-install etc/* %{buildroot}%{_sysconfdir}/%{name}/
-install -d %{buildroot}%{_sysconfdir}/cron.d
-cat <<CRON > %{buildroot}%{_sysconfdir}/cron.d/%{name}
-SHELL=/bin/sh
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=root
-50 23 * * * root squid-analyzer && squid -k rotate
-CRON
-
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/cron.d/
+%{__make} DESTDIR=%{buildroot} install
+%{__install} etc/* %{buildroot}%{_sysconfdir}/%{name}/
+%{__install} -Dp -m0755 %{name}-cron %{buildroot}%{_sysconfdir}/cron.d/%{name}
+%{__install} -Dp -m0644 %{name}-nginx.conf %{buildroot}%{_sysconfdir}/nginx/conf.d/%{name}.conf
+%{__install} -Dp -m0755 squid-maintenance.sh %{buildroot}%{_bindir}/squid-maintenance.sh
 
 %files
 %defattr(-,root,root)
@@ -56,6 +106,7 @@ CRON
 %{_mandir}/man3/*
 %{perl_vendorlib}/SquidAnalyzer.pm
 %attr(0755,root,root) %{_bindir}/squid-analyzer
+%attr(0755,root,root) %{_bindir}/squid-maintenance.sh
 %attr(0755,root,root) %{_libdir}/perl5/perllocal.pod
 %attr(0755,root,root) %{_libdir}/perl5/vendor_perl/auto/SquidAnalyzer/.packlist
 %attr(0755,root,root) %dir %{_sysconfdir}/%{name}
@@ -65,6 +116,7 @@ CRON
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/%{name}/network-aliases
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/%{name}/user-aliases
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/cron.d/%{name}
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/nginx/conf.d/%{name}.conf
 %attr(0755,root,root) %dir %{_sysconfdir}/%{name}/lang
 %{_sysconfdir}/%{name}/lang/*
 %attr(0755,root,root) %dir %{contentdir}/html/%{name}
