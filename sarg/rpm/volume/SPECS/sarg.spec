@@ -95,7 +95,7 @@ squid -k rotate
 sleep 5
 
 logger -t $0 'Generate sarg reports'
-sarg -l /var/logs/squid/access.log.0
+sarg -l /var/log/squid/access.log.0
 
 logger -t $0 'End squid maintenance'
 EOF
