@@ -121,7 +121,7 @@ EOF
 
 %{__install} -Dp -m0644 sarg-nginx.conf %{buildroot}%{_sysconfdir}/nginx/conf.d/sarg.conf
 %{__install} -Dp -m0644 css.tpl %{buildroot}%{_localstatedir}/www/html/sarg/sarg.css
-%{__install} -Dp -m0755 sarg-cron %{buildroot}%{_sysconfdir}/cron.d/sarg
+%{__install} -Dp -m0644 sarg-cron %{buildroot}%{_sysconfdir}/cron.d/sarg
 
 %{__cp} -av fonts/ images/ %{buildroot}%{_sysconfdir}/sarg/
 
