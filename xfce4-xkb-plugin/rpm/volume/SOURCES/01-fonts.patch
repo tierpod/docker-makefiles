@@ -1,0 +1,11 @@
+--- xfce4-xkb-plugin-0.7.1/panel-plugin/xkb-cairo.c	2015-10-15 08:57:22.581938360 +0000
++++ xfce4-xkb-plugin-0.7.1.orig/panel-plugin/xkb-cairo.c	2015-10-15 08:57:54.021053946 +0000
+@@ -31,7 +31,7 @@
+ #include <librsvg/rsvg-cairo.h>
+ #endif
+ 
+-#define XKB_PREFERRED_FONT "Courier New, Courier 10 Pitch, Monospace Bold"
++#define XKB_PREFERRED_FONT "LiberationMono, Ubuntu Mono, Droid Sans Mono"
+ 
+ #define xkb_cairo_arc_for_flag(cr, x, y, r, a1, a2) \
+     xx = layoutx + width - 12 + x; \
