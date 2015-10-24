@@ -1,6 +1,6 @@
 Name:           ubuntu-font-family
 Version:        0.83
-Release:        0
+Release:        1
 Summary:        Ubuntu fonts by Dalton Maag
 Group:          System/GUI/Other
 # -- https://launchpad.net/ubuntu-font-licence
@@ -23,7 +23,9 @@ A total of 13 variants!
 %setup -q
 # -- "Laugh it up Miller" - fix typo
 mv LICENCE.txt LICENSE.txt
-
+# fix https://bugs.launchpad.net/ubuntu-font-family/+bug/744812 issue:
+# wrong font rendering for qt applications
+rm Ubuntu-M.ttf Ubuntu-MI.ttf
 
 %build
 
@@ -52,7 +54,10 @@ fi
 
 
 %changelog
-* Fri 16 16 Oct 2015 14:35:49 +0500 Podkorytov Pave <podkorytov_pm> - 0.83
+* Fri Oct 24 2015 Podkorytov Pavel <pod.pavel@gmail.com> - 0.83-1
+- Remove Ubuntu-M (Medium), fix for bold qt fonts.
+
+* Fri Oct 16 2015 Podkorytov Pavel <pod.pavel@gmail.com> - 0.83-0
 - Bump version
 
 * Tue Nov 13 2012 Damian Ivanov <damianatorrpm@gmail.com> - 0.2.6-4
