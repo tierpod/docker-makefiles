@@ -31,7 +31,7 @@ switch to another one. It's written in C and uses the GTK library.
 %{_datadir}/%name/
 %{_datadir}/pixmaps/%name.xpm
 %{_mandir}/man1/%name.1.*
-%doc doc/AUTHORS doc/NEWS
+%doc doc/AUTHORS doc/COPYING doc/CREDITS doc/INSTALL doc/NEWS
 
 %changelog
 * Mon Oct 26 2015 Pavel Podkorytov <pod.pavel@gmail.com> 0.7.6-0
