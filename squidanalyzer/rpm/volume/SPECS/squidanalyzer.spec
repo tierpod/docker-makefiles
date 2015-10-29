@@ -2,12 +2,13 @@
 
 Summary:	Squid proxy log analyzer and report generator
 Name:		squidanalyzer
-Version:	6.2
+Version:	6.3
 Release:	1
 License:	GPLv3
 Group:		Monitoring
 URL:		http://%{name}.darold.net/
-Source:		https://github.com/darold/%{name}/archive/v%{version}-%{release}.tar.gz
+#Source:		https://github.com/darold/%{name}/archive/v%{version}.tar.gz
+Source:		http://prdownloads.sourceforge.net/squid-report/%{name}-%{version}-%{release}.tar.gz
 BuildRequires:	perl
 BuildArch:	noarch
 
