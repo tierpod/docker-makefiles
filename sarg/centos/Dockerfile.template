@@ -1,0 +1,17 @@
+FROM builder-centos
+MAINTAINER Pavel Podkorytov <pod.pavel@gmail.com>
+
+ENV TARGET={target}
+
+USER root
+
+# Install dependencies from spec-file
+ADD ["volume/SPECS/$TARGET", "/tmp/"]
+RUN yum-builddep -y /tmp/$TARGET
+
+ADD ["entrypoint.sh", "/entrypoint.sh"]
+RUN chmod +x /entrypoint.sh
+
+USER builder
+
+CMD /entrypoint.sh

@@ -7,7 +7,6 @@ Release:	1
 License:	GPLv3
 Group:		Monitoring
 URL:		http://%{name}.darold.net/
-#Source:		https://github.com/darold/%{name}/archive/v%{version}.tar.gz
 Source:		http://prdownloads.sourceforge.net/squid-report/%{name}-%{version}-%{release}.tar.gz
 BuildRequires:	perl
 BuildArch:	noarch
