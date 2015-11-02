@@ -1,4 +1,4 @@
-IMAGE = builder-fedora
+IMAGE = builder-gxkb
 TARGET = gxkb.spec
 
 include ../../include/common.mk
