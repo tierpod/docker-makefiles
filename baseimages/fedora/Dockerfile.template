@@ -19,4 +19,3 @@ RUN mkdir ~/build && \
     echo '%_topdir /home/builder/build' > ~/.rpmmacros
 
 WORKDIR /home/builder/build
-CMD /entrypoint.sh
