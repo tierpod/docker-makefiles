@@ -3,11 +3,11 @@
 if [ -n "$TARGET" ]; then
 	# Create SOURCES directory
 	[ -d 'SOURCES' ] || mkdir SOURCES
-	# Download and extract src.rpm to SOURCES
+	# Download and extract src.rpm to SOURCES (centos patches)
 	cd SOURCES
 	yumdownloader --source postfix
 	rpm2cpio *.src.rpm | cpio --extract --make-directories --verbose
-	cd ../
+	cd -
 	spectool -g -R SPECS/$TARGET
 	# Build rpm package
 	rpmbuild -ba SPECS/$TARGET

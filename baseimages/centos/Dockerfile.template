@@ -4,6 +4,9 @@ MAINTAINER Pavel Podkorytov <pod.pavel@gmail.com>
 ENV USERID={userid}
 ENV GROUPID={groupid}
 
+# Enable Centos-Sources repos
+RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/CentOS-Sources.repo
+
 # Install main dependencies
 RUN yum install -y epel-release rpmdevtools make yum-utils '@Development Tools' && \
     yum clean all
