@@ -20,6 +20,7 @@ all: show image package
 show:
 	@echo ' USERID=$(USERID) GROUPID=$(GROUPID) RELEASE=$(RELEASE)'
 	@echo ' IMAGE=$(IMAGE) TARGET=$(TARGET) COMMIT=$(COMMIT)'
+	@echo '-------------------------------------------------------'
 
 Dockerfile:
 	@cat Dockerfile.template | \
