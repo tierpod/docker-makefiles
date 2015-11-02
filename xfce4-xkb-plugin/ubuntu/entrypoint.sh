@@ -5,7 +5,7 @@ if [ -n "$TARGET" ]; then
 	DEBEMAIL='pod.pavel@gmail.com'
 	DEBFULLNAME='Pavel Podkorytov'
 	PATCHDIR='patches'
-	
+
 	# Build package
 	[ ! -d 'DEBS' ] && mkdir -p DEBS
 	apt-get source --download-only xfce4-xkb-plugin
