@@ -5,7 +5,8 @@ ENV USERID={userid}
 ENV GROUPID={groupid}
 
 # Install main dependencies
-RUN dnf install -y rpmdevtools make yum-utils '@Development Tools' 'dnf-command(builddep)' && \
+RUN dnf install -y rpmdevtools make yum-utils '@Development Tools' \
+    'dnf-command(builddep)' 'dnf-command(download)' && \
     dnf clean all
 
 # Create builder group and user
