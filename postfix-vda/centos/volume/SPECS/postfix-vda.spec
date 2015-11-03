@@ -83,7 +83,7 @@ Patch2: postfix-2.6.1-files.patch
 Patch3: postfix-alternatives.patch
 Patch8: postfix-large-fs.patch
 Patch9: pflogsumm-1.1.3-datecalc.patch
-Patch49: http://vda.sourceforge.net/VDA/postfix-vda-v13-2.10.0.patch
+Patch200: http://vda.sourceforge.net/VDA/postfix-vda-v13-2.10.0.patch
 
 # Optional patches - set the appropriate environment variables to include
 #		     them when building the package/spec file
@@ -152,7 +152,7 @@ pushd pflogsumm-%{pflogsumm_ver}
 popd
 %endif
 
-%patch49 -p1
+%patch200 -p1
 
 for f in README_FILES/TLS_{LEGACY_,}README TLS_ACKNOWLEDGEMENTS; do
 	iconv -f iso8859-1 -t utf8 -o ${f}{_,} &&
