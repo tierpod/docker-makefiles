@@ -1,4 +1,4 @@
 IMAGE = builder-centos
-TARGET = nginx.spec
+TARGET = none
 
 include ../../include/common.mk
