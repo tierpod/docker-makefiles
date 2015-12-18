@@ -17,7 +17,7 @@ Group:          User Interface/Desktops
 License:        BSD
 URL:            http://goodies.xfce.org/projects/panel-plugins/%{name}
 Source0:        http://archive.xfce.org/src/panel-plugins/%{name}/%{minor_version}/%{name}-%{version}.tar.bz2
-Patch0:		01-fonts.patch
+Patch0:         01-fonts.patch
 #VCS:           git:git://git.xfce.org/panel-plugins/xfce4-xkb-plugin
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
