@@ -1,0 +1,24 @@
+IMAGE = builder-fedora_xfce4-xkb-plugin
+TARGET = xfce4-xkb-plugin.git.spec
+
+include ../../include/common.mk
+
+
+
+SOURCES = build-env/SOURCES
+SPECS = build-env/SPECS
+
+TARGET_NAME = xfce4-xkb-plugin
+TARGET_URL = git://git.xfce.org/panel-plugins/xfce4-xkb-plugin
+TARGET_ARCHIVE = $(TARGET_NAME)-git.tar.bz2
+
+prepare: $(SOURCES) $(SOURCES)/$(TARGET_NAME) $(SOURCES)/$(TARGET_ARCHIVE)
+
+$(SOURCES):
+	cp -r volume build-env
+
+$(SOURCES)/$(TARGET_NAME):
+	cd $(SOURCES) && git clone $(TARGET_URL)
+
+$(SOURCES)/$(TARGET_ARCHIVE):
+	tar -cjf $(SOURCES)/$(TARGET_ARCHIVE) -C $(SOURCES) $(TARGET_NAME)
