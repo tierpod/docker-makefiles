@@ -2,16 +2,15 @@
 
 Summary:	Squid proxy log analyzer and report generator
 Name:		squidanalyzer
-Version:	6.3
+Version:	6.5
 Release:	1
 License:	GPLv3
 Group:		Monitoring
 URL:		http://%{name}.darold.net/
-Source:		http://prdownloads.sourceforge.net/squid-report/%{name}-%{version}-%{release}.tar.gz
-BuildRequires:	perl
+Source:		http://prdownloads.sourceforge.net/squid-report/%{name}-%{version}.tar.gz
 BuildArch:	noarch
-
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Buildroot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: perl
 BuildRequires: perl-ExtUtils-MakeMaker, perl-ExtUtils-Install, perl-ExtUtils-Manifest, perl-ExtUtils-ParseXS, perl-Time-HiRes
 BuildRequires: gdbm-devel, libdb-devel, perl-devel, systemtap-sdt-devel
 
@@ -29,7 +28,7 @@ or more often with heavy proxy usage.
 
 %prep
 
-%setup -q -n %{name}-%{version}-%{release}
+%setup -q -n %{name}-%{version}
 
 # Add cron config
 %{__cat} <<EOF > %{name}-cron
@@ -71,18 +70,19 @@ EOF
 #!/bin/sh -e
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
+PROGNAME=$(basename $0)
 
-logger -t $0 'Start squid maintenance'
+logger -t $PROGNAME 'Start squid maintenance'
 
-logger -t $0 'Rotate squid logs'
+logger -t $PROGNAME 'Rotate squid logs'
 squid -k rotate
 
 sleep 5
 
-logger -t $0 'Generate squidanalyzer reports'
+logger -t $PROGNAME 'Generate squidanalyzer reports'
 squid-analyzer --no-year-stat --no-week-stat --preserve 2 -j 2
 
-logger -t $0 'End squid maintenance'
+logger -t $PROGNAME 'End squid maintenance'
 EOF
 
 %build

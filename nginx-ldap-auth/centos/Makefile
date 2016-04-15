@@ -3,8 +3,8 @@ TARGET = nginx.spec
 
 include ../../include/common.mk
 
-SOURCES = build-env/SOURCES
-SPECS = build-env/SPECS
+SOURCES = $(TMP_DIR)/volume/SOURCES
+SPECS = $(TMP_DIR)/volume/SPECS
 
 NGINX_NAME = nginx-1.8.0-1.el7.ngx.src.rpm
 NGINX_URL = http://nginx.org/packages/rhel/7/SRPMS/$(NGINX_NAME)

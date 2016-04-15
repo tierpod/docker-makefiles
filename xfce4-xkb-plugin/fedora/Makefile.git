@@ -1,12 +1,12 @@
-IMAGE = builder-fedora_xfce4-xkb-plugin
+IMAGE = builder-fedora_xfce4-xkb-plugin_git
 TARGET = xfce4-xkb-plugin.git.spec
 
 include ../../include/common.mk
 
 
 
-SOURCES = build-env/SOURCES
-SPECS = build-env/SPECS
+SOURCES = $(TMP_DIR)/volume/SOURCES
+SPECS = $(TMP_DIR)/volume/SPECS
 
 TARGET_NAME = xfce4-xkb-plugin
 TARGET_URL = git://git.xfce.org/panel-plugins/xfce4-xkb-plugin

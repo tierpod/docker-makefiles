@@ -1,4 +1,4 @@
-IMAGE = builder-centos
-TARGET = none
+IMAGE = builder-centos7
+TARGET =
 
 include ../../include/common.mk

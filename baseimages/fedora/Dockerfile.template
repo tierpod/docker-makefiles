@@ -6,16 +6,19 @@ ENV GROUPID={groupid}
 
 # Install main dependencies
 RUN dnf install -y rpmdevtools make yum-utils '@Development Tools' \
-    'dnf-command(builddep)' 'dnf-command(download)' && \
-    dnf clean all
+    'dnf-command(builddep)' 'dnf-command(download)' \
+    && dnf clean all
 
 # Create builder group and user
-RUN groupadd -g $GROUPID builder && \
-    useradd -m -s /bin/bash -u $USERID -g $GROUPID builder
+RUN groupadd -g $GROUPID builder \
+    && useradd -m -s /bin/bash -u $USERID -g $GROUPID builder
+
+# Add default entrypoint
+ADD ["entrypoint.sh", "/entrypoint.sh"]
+RUN chmod +x /entrypoint.sh
 
 # Setup user-specific settings
 USER builder
-RUN mkdir ~/build && \
-    echo '%_topdir /home/builder/build' > ~/.rpmmacros
-
-WORKDIR /home/builder/build
+RUN rpmdev-setuptree
+WORKDIR /home/builder/rpmbuild
+CMD /entrypoint.sh

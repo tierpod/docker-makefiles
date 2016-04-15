@@ -1,4 +1,4 @@
-IMAGE = builder-fedora
-TARGET = none
+IMAGE = builder-fedora23
+TARGET =
 
 include ../../include/common.mk

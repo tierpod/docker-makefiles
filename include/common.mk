@@ -1,7 +1,5 @@
-USERID = $(shell id -u)
-GROUPID = $(shell id -g)
-
-.PHONY: all show clean clean-all package shell prepare
+USERID := $(shell id -u)
+GROUPID := $(shell id -g)
 
 BUILD_NUMBER ?= 0
 TARGET ?= $(error TARGET is not defined)
@@ -13,19 +11,24 @@ else
 RELEASE = $(BUILD_NUMBER)
 endif
 
-DOCKER_OPTS = --rm -v $(PWD)/build-env/:/home/builder/build -e TARGET=$(TARGET) -e RELEASE=$(RELEASE)
+TMP_DIR = /tmp/$(IMAGE)
+DOCKER_VOLUME = -v $(TMP_DIR)/volume:/home/builder/rpmbuild
+DOCKER_ENV = -e TARGET=$(TARGET) -e RELEASE=$(RELEASE)
+
+.PHONY: all show clean clean-all package shell prepare
 
 all: show image package
 
 show:
-	@echo ' USERID=$(USERID) GROUPID=$(GROUPID) RELEASE=$(RELEASE)'
-	@echo ' IMAGE=$(IMAGE) TARGET=$(TARGET) COMMIT=$(COMMIT)'
+	@echo '-------------------------------------------------------'
+	@echo 'USERID=$(USERID) GROUPID=$(GROUPID) RELEASE=$(RELEASE)'
+	@echo 'IMAGE=$(IMAGE) TARGET=$(TARGET) COMMIT=$(COMMIT)'
 	@echo '-------------------------------------------------------'
 
 Dockerfile:
-	@cat Dockerfile.template | \
-		sed -e "s@{userid}@$(USERID)@" -e "s@{groupid}@$(GROUPID)@" -e "s@{target}@$(TARGET)@" | \
-		tee Dockerfile
+	@cat Dockerfile.template \
+		| sed -e "s@{userid}@$(USERID)@" -e "s@{groupid}@$(GROUPID)@" -e "s@{target}@$(TARGET)@" \
+		| tee Dockerfile
 
 image: show Dockerfile
 	docker build -t $(IMAGE) .
@@ -34,16 +37,19 @@ ifneq ($(BUILD_NUMBER), 0)
 endif
 
 clean:
-	rm -rf Dockerfile build-env
+	rm -rf Dockerfile $(TMP_DIR)
 
 clean-all: clean
-	docker rmi $(IMAGE):$(BUILD_NUMBER)
+	-docker rmi $(IMAGE):$(BUILD_NUMBER)
 
-build-env:
-	cp -r volume build-env
+build-env: $(TMP_DIR)
+	-cp -r volume $(TMP_DIR)
 
 package: build-env prepare
-	docker run $(DOCKER_OPTS) $(IMAGE)
+	docker run --rm $(DOCKER_VOLUME) $(DOCKER_ENV) $(IMAGE)
 
 shell: build-env prepare
-	docker run -it -u root $(DOCKER_OPTS) $(IMAGE) /bin/bash
+	docker run --rm -it -u root $(DOCKER_VOLUME) $(DOCKER_ENV) $(IMAGE) /bin/bash
+
+$(TMP_DIR):
+	mkdir -p $(TMP_DIR)
