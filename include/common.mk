@@ -28,7 +28,7 @@ show:
 Dockerfile:
 	@cat Dockerfile.template \
 		| sed -e "s@{userid}@$(USERID)@" -e "s@{groupid}@$(GROUPID)@" -e "s@{target}@$(TARGET)@" \
-		| tee Dockerfile
+		| tee $@
 
 image: show Dockerfile
 	docker build -t $(IMAGE) .
@@ -52,4 +52,4 @@ shell: build-env prepare
 	docker run --rm -it -u root $(DOCKER_VOLUME) $(DOCKER_ENV) $(IMAGE) /bin/bash
 
 $(TMP_DIR):
-	mkdir -p $(TMP_DIR)
+	mkdir -p $@
