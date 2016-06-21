@@ -8,6 +8,9 @@ License:	GPLv3
 Group:		Monitoring
 URL:		http://%{name}.darold.net/
 Source:		http://prdownloads.sourceforge.net/squid-report/%{name}-%{version}.tar.gz
+Source10:	squidanalyzer.conf
+Source11:	squid-maintenance
+Source12:	squid-maintenance.sh
 BuildArch:	noarch
 Buildroot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: perl
@@ -30,75 +33,24 @@ or more often with heavy proxy usage.
 
 %setup -q -n %{name}-%{version}
 
-# Add cron config
-%{__cat} <<EOF > %{name}-cron
-SHELL=/bin/sh
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=root
-59 23 * * * root squid-maintenance.sh
-EOF
-
-# Add nginx config
-%{__cat} <<EOF >%{name}-nginx.conf
-server {
-	listen *:443;
-	server_name	localhost;
-
-	access_log /var/log/nginx/squidanalyzer-ssl-access.log main;
-
-	ssl on;
-	ssl_certificate ssl/localhost.crt;
-	ssl_certificate_key ssl/localhost.key;
-
-	ssl_protocols SSLv3 TLSv1;
-	ssl_ciphers ALL:!ADH:!EXPORT56:RC4:RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
-	ssl_prefer_server_ciphers on;
-
-	ssl_session_timeout 5m;
-
-	location /squidanalyzer {
-		autoindex on;
-		root /var/www/html;
-		auth_basic "Restricted";
-		auth_basic_user_file auth/htpasswd;
-	}
-}
-EOF
-
-# Add squid-maintenance.sh
-%{__cat} <<'EOF' >squid-maintenance.sh
-#!/bin/sh -e
-
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-PROGNAME=$(basename $0)
-
-logger -t $PROGNAME 'Start squid maintenance'
-
-logger -t $PROGNAME 'Rotate squid logs'
-squid -k rotate
-
-sleep 5
-
-logger -t $PROGNAME 'Generate squidanalyzer reports'
-squid-analyzer --no-year-stat --no-week-stat --preserve 2 -j 2
-
-logger -t $PROGNAME 'End squid maintenance'
-EOF
-
 %build
 perl Makefile.PL DESTDIR=%{buildroot} LOGFILE=%{_logdir}/squid/access.log BINDIR=%{_bindir} HTMLDIR=%{contentdir}/html/%{name} BASEURL=/%{name} MANDIR=%{_mandir}/man3 QUIET=yes
 
 make
 
 %install
-%{__rm} -rf %{buildroot}
-
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/cron.d/
 %{__make} DESTDIR=%{buildroot} install
 %{__install} etc/* %{buildroot}%{_sysconfdir}/%{name}/
-%{__install} -Dp -m0755 %{name}-cron %{buildroot}%{_sysconfdir}/cron.d/%{name}
-%{__install} -Dp -m0644 %{name}-nginx.conf %{buildroot}%{_sysconfdir}/nginx/conf.d/%{name}.conf
-%{__install} -Dp -m0755 squid-maintenance.sh %{buildroot}%{_bindir}/squid-maintenance.sh
+# nginx config
+%{__install} -Dp -m0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/nginx/conf.d/%{name}.conf
+# crond
+%{__install} -Dp -m0755 %{SOURCE11} %{buildroot}%{_sysconfdir}/cron.d/%{name}
+# wrapper
+%{__install} -Dp -m0755 %{SOURCE12} %{buildroot}%{_bindir}/squid-maintenance.sh
+
+%clean
+%{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
@@ -125,7 +77,4 @@ make
 %{contentdir}/html/%{name}/%{name}.css
 %attr(0755,root,root) %dir %{contentdir}/html/%{name}/images
 %{contentdir}/html/%{name}/images/*.png
-
-%clean
-rm -rf %{buildroot}
 
