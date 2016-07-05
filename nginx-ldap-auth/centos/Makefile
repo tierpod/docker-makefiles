@@ -1,4 +1,4 @@
-IMAGE = builder-centos_nginx-auth-ldap
+IMAGE = builder-centos7_nla
 TARGET = nginx.spec
 
 include ../../include/common.mk
