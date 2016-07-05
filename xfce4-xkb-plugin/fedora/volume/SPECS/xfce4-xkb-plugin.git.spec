@@ -11,7 +11,7 @@
 
 Name:           xfce4-xkb-plugin
 Version:        0.7.1
-Release:        3%{?dist}%{?commit}
+Release:        9%{?dist}%{?commit}
 Summary:        XKB layout switcher for the Xfce panel
 
 Group:          User Interface/Desktops
