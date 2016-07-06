@@ -11,11 +11,11 @@ else
 RELEASE = $(BUILD_NUMBER)
 endif
 
-TMP_DIR = /tmp/$(IMAGE)
+TMP_DIR = /docker-home/$(IMAGE)
 DOCKER_VOLUME = -v $(TMP_DIR)/volume:/home/builder/rpmbuild
 DOCKER_ENV = -e TARGET=$(TARGET) -e RELEASE=$(RELEASE)
 
-.PHONY: all show clean clean-all package shell prepare
+.PHONY: all show clean clean-all build-env package shell prepare
 
 all: show image package
 
