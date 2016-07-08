@@ -70,8 +70,10 @@ Requires: hicolor-icon-theme
 # built as a subpackage of gtk3
 Requires: gtk-update-icon-cache
 
+%if 0%{?fedora} > 22
 # required to support all the different image formats
 Requires: gdk-pixbuf2-modules%{?_isa}
+%endif
 
 # We need to prereq these so we can run gtk-query-immodules-2.0
 Requires(post): glib2 >= %{glib2_version}
