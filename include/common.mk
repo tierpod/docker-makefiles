@@ -3,7 +3,7 @@ USERID := $(shell id -u)
 GROUPID := $(shell id -g)
 DOCKERFILE := Dockerfile
 
-BUILD_NUMBER ?= 0
+BUILD_NUMBER ?= latest
 IMAGE ?= $(error IMAGE is not defined)
 
 ifdef COMMIT
@@ -39,7 +39,7 @@ show:
 
 image: show
 	docker build $(DOCKER_BUILDARG) -t $(IMAGE) -f $(DOCKERFILE) .
-ifneq ($(BUILD_NUMBER), 0)
+ifneq ($(BUILD_NUMBER), latest)
 	docker tag $(IMAGE):latest $(IMAGE):$(BUILD_NUMBER)
 endif
 
